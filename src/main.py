@@ -163,11 +163,11 @@ trajectories = [
 
 drones = [
     Drone("SimpleFlight", (0, 0, -1), trajectories[0]),
-    Drone("Drone2", (0, 1.5, -1), trajectories[1]),
-    Drone("Drone3", (1.5, 0, -1), trajectories[2]),
-    Drone("Drone4", (-1.5, 0, -1), trajectories[3]),
-    Drone("Drone5", (0, -1.5, -1), trajectories[4]),
-    # Drone("Drone1", (1.5, 1.5, -1), trajectories[5]),
+    Drone("Drone1", (0, 1.5, -1), trajectories[1]),
+    Drone("Drone2", (1.5, 0, -1), trajectories[2]),
+    Drone("Drone3", (-1.5, 0, -1), trajectories[3]),
+    Drone("Drone4", (0, -1.5, -1), trajectories[4]),
+    # Drone("Drone5", (1.5, 1.5, -1), trajectories[5]),
     # Drone("Drone6", (1.5, -1.5, -1), trajectories[6]),
     # Drone("Drone7", (-1.5, 1.5, -1), trajectories[7]),
     # Drone("Drone8", (-1.5, -1.5, -1), trajectories[8]),
