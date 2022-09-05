@@ -11,13 +11,16 @@ class Drone:
   def __init__(
       self,
       name,
-      client: airsim.MultirotorClient,
-      initialPosition: List[float]
+      initialPosition: List[float],
+      trajectory: List[List[float]] = [],
   ) -> None:
     self.name = name
-    self.client = client
-    self.trajectory = []
-    self.velocity = 5
+
+    self.client = airsim.MultirotorClient()
+    self.client.confirmConnection()
+
+    self.trajectory = trajectory
+    self.velocity = 4
 
     if self.name not in self.client.listVehicles():
       self.client.simAddVehicle(
@@ -30,11 +33,13 @@ class Drone:
     self.stopThread = False
     self.hovering = True
 
-  def start(self):
-    print("Starting drone %s" % self.name)
     self.client.enableApiControl(True, vehicle_name=self.name)
     self.client.armDisarm(True, vehicle_name=self.name)
     self.takeOff()
+
+  def start(self):
+    print("Starting drone %s" % self.name)
+    self.flyThread()
 
   # async def startTrajectory(self):
 
@@ -58,15 +63,14 @@ class Drone:
     if self.flyingThread:
       self.flyingThread.join()
 
-  async def flyThread(self):
+  def flyThread(self):
 
     while not self.stopThread:
       if len(self.trajectory):
         self.flyToNextPoint()
       else:
         self.hover()
-
-      await asyncio.sleep(0.1)
+      time.sleep(0.1)
     # if len(self.trajectory) > 0:
     #   self.hovering = False
     #   self.flyToNextPoint()
@@ -78,10 +82,10 @@ class Drone:
 
   def addNewPosition(self, x, y, z):
     self.trajectory.append((x, y, z))
-    if self.hovering:
-      asyncio.run(
-          self.flyThread()
-      )
+    # if self.hovering:
+    #   asyncio.run(
+    #       self.flyThread()
+    #   )
 
   def updateVelocity(self, newVelocity: float):
     self.velocity = newVelocity

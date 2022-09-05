@@ -1,150 +1,197 @@
 import asyncio
 import multiprocessing
+from multiprocessing.dummy import Process
 import threading
 import airsim
 from lib.Drone import Drone
-from concurrent.futures import ProcessPoolExecutor
 
 
-client = airsim.MultirotorClient()
-client.confirmConnection()
+# client = airsim.MultirotorClient()
+# client.confirmConnection()
 # client.reset()
 # client.confirmConnection()
 
+# sp = [
+#     [0, 0, -1],
+#     [-0.75, 0.75, -1],
+#     [0, 1.5, -1],
+#     [0.75, 2.25, -1],
+#     [1.5, 1.5, -1],
+#     [2.25, 0.75, -1],
+#     [1.5, 0, -1],
+#     [-0.75, 0.75, -1],
+# ]
 
-async def show_message():
-  while True:
-    await asyncio.sleep(1)
-    print('API call is in progress...')
+# positions = []
 
-
-sp = [
-    [0, 0, -1],
-    [-0.75, 0.75, -1],
-    [0, 1.5, -1],
-    [0.75, 2.25, -1],
-    [1.5, 1.5, -1],
-    [2.25, 0.75, -1],
-    [1.5, 0, -1],
-    [-0.75, 0.75, -1],
-]
-
-positions = []
-
-for i in range(1, 5):
-  positions += [
-      [x, y, -i] for x, y, _ in sp
-  ]
+# for i in range(1, 5):
+#   positions += [
+#       [x, y, -i] for x, y, _ in sp
+#   ]
 
 
-trajectories = {
-    0: (positions)*10_000,
-    1: (positions[1:]+positions[:1])*10_000,
-    2: (positions[2:]+positions[:2])*10_000,
-    3: (positions[3:]+positions[:3])*10_000,
-}
-
-# for position in trajectories[2]:
-#   print(position)
-
-# print(trajectories)
 # trajectories = {
-#     0: [[-10, -10, -10]],
-#     1: [[10, 10, -10]],
-#     2: [[-10, 10, -10]],
-#     3: [[10, -10, -10]],
+#     0: (positions)*10_000,
+#     1: (positions[1:]+positions[:1])*10_000,
+#     2: (positions[2:]+positions[:2])*10_000,
+#     3: (positions[3:]+positions[:3])*10_000,
+#     4: (positions[4:]+positions[:4])*10_000,
+#     5: (positions[5:]+positions[:5])*10_000,
+#     6: (positions[6:]+positions[:6])*10_000,
+#     7: (positions[7:]+positions[:7])*10_000,
+#     8: (positions[8:]+positions[:8])*10_000,
+# }
+
+trajectories = [
+    [
+        (0, 0, -1),
+        (0, 0, -1),
+        (0, 0, -2),
+        (0, 0, -3),
+        (0, 0, -4),
+        (0, 0, -3),
+        (0, 0, -2),
+        (0, 0, -1),
+        (0, 0, -1),
+    ]*10_000,
+    [
+        (0, 1.5, -1),
+        (0, 2,  -1),
+        (0, 3,  -1),
+        (0, 4,  -1),
+        (0, 5,  -1),
+        (0, 6,  -1),
+        (0, 5,  -1),
+        (0, 4,  -1),
+        (0, 3,  -1),
+        (0, 2,  -1),
+        (0, 1.5, -1),
+    ]*10_000,
+    [
+        (1.5, 0, -1),
+        (2, 0, -1),
+        (3, 0, -1),
+        (4, 0, -1),
+        (5, 0, -1),
+        (6, 0, -1),
+        (5, 0, -1),
+        (4, 0, -1),
+        (3, 0, -1),
+        (2, 0, -1),
+        (1.5, 0, -1),
+    ]*10_000,
+    [
+        (-1.5, 0, -1),
+        (-2, 0, -1),
+        (-3, 0, -1),
+        (-4, 0, -1),
+        (-5, 0, -1),
+        (-6, 0, -1),
+        (-5, 0, -1),
+        (-4, 0, -1),
+        (-3, 0, -1),
+        (-2, 0, -1),
+        (-1.5, 0, -1),
+    ]*10_000,
+    [
+        (0, -1.5, -1),
+        (0, -2, -1),
+        (0, -3, -1),
+        (0, -4, -1),
+        (0, -5, -1),
+        (0, -6, -1),
+        (0, -5, -1),
+        (0, -4, -1),
+        (0, -3, -1),
+        (0, -2, -1),
+        (0, -1.5, -1),
+    ]*10_000,
+    [
+        (1.5, 1.5, -1),
+        (2, 2, -1),
+        (3, 3, -1),
+        (4, 4, -1),
+        (5, 5, -1),
+        (6, 6, -1),
+        (5, 5, -1),
+        (4, 4, -1),
+        (3, 3, -1),
+        (2, 2, -1),
+        (1.5, 1.5, -1),
+    ]*10_000,
+    [
+        (1.5, -1.5, -1),
+        (2, -2, -1),
+        (3, -3, -1),
+        (4, -4, -1),
+        (5, -5, -1),
+        (6, -6, -1),
+        (5, -5, -1),
+        (4, -4, -1),
+        (3, -3, -1),
+        (2, -2, -1),
+        (1.5, -1.5, -1),
+    ]*10_000,
+    [
+        (-1.5, 1.5, -1),
+        (-2, 2,  -1),
+        (-3, 3,  -1),
+        (-4, 4,  -1),
+        (-5, 5,  -1),
+        (-6, 6,  -1),
+        (-5, 5,  -1),
+        (-4, 4,  -1),
+        (-3, 3,  -1),
+        (-2, 2,  -1),
+        (-1.5, 1.5, -1),
+    ]*10_000,
+    [
+        (-1.5, -1.5, -1),
+        (-2, -2,  -1),
+        (-3, -3,  -1),
+        (-4, -4,  -1),
+        (-5, -5,  -1),
+        (-6, -6,  -1),
+        (-5, -5,  -1),
+        (-4, -4,  -1),
+        (-3, -3,  -1),
+        (-2, -2,  -1),
+        (-1.5, -1.5, -1),
+    ]*10_000,
+]
 # }
 
 drones = [
-    Drone("SimpleFlight", client, (0, 0, 0)),
-    Drone("Drone1", client, (1.5, 1.5, 0)),
-    Drone("Drone2", client, (0, 1.5, 0)),
-    Drone("Drone3", client, (1.5, 0, 0)),
+    Drone("SimpleFlight", (0, 0, -1), trajectories[0]),
+    Drone("Drone2", (0, 1.5, -1), trajectories[1]),
+    Drone("Drone3", (1.5, 0, -1), trajectories[2]),
+    Drone("Drone4", (-1.5, 0, -1), trajectories[3]),
+    Drone("Drone5", (0, -1.5, -1), trajectories[4]),
+    # Drone("Drone1", (1.5, 1.5, -1), trajectories[5]),
+    # Drone("Drone6", (1.5, -1.5, -1), trajectories[6]),
+    # Drone("Drone7", (-1.5, 1.5, -1), trajectories[7]),
+    # Drone("Drone8", (-1.5, -1.5, -1), trajectories[8]),
 ]
 
 
-# async def main():
-# for drone
-#
-#  in drones:
-#   # airsim.wait_key('Press any key to start drone %s' % drone.name)
-#   drone.start()
+# processes = [
+#     Process(target=drone.start) for drone in drones
+# ]
+# airsim.wait_key('Press any key to start the dance')
 
-# airsim.wait_key('Press any key to set Trajectories')
-# for idx, drone in enumerate(drones):
-#   drone.trajectory = trajectories[idx]
+# for process in processes:
+#   process.start()
 
-# # mainTask = asyncio.create_task(show_message())
+# for process in processes:
+#   process.join()
 
-# tasks = []
-# # for drone in drones:
-# #   # airsim.wait_key(
-# #   #     'Press any key to start Trajectory for drone %s' % drone.name)
-# #   tasks.append(asyncio.create_task(drone.startTrajectory()))
-# # thread = threading.Thread(target=drone.flyThread)
-# # thread.start()
+threads = [
+    threading.Thread(target=drone.start) for drone in drones
+]
+airsim.wait_key('Press any key to start the dance')
 
-# executor = ProcessPoolExecutor(len(drones))
-# loop = asyncio.get_event_loop()
+for thread in threads:
+  thread.start()
 
-# for drone in drones:
-#   # await task
-
-#   tasks += [loop.run_in_executor(executor, drone.startTrajectory)]
-
-# loop.run_forever()
-# for drone in drones:
-#   drone.join()
-
-# for drone in drones:
-#   drone.stop()
-
-# await mainTask
-
-# while True:
-#   for drone in drones:
-#     try:
-#       position = map(float, input(
-#           "enter a new point for %s to go to : " % drone.name).split())
-#       drone.addNewPosition(*position)
-#     except:
-#       print("Invalid input")
-
-# asyncio.run(main())
-
-
-for drone in drones:
-  # airsim.wait_key('Press any key to start drone %s' % drone.name)
-  drone.start()
-
-
-# mainTask = asyncio.create_task(show_message())
-
-tasks = []
-# for drone in drones:
-#   # airsim.wait_key(
-#   #     'Press any key to start Trajectory for drone %s' % drone.name)
-#   tasks.append(asyncio.create_task(drone.startTrajectory()))
-# thread = threading.Thread(target=drone.flyThread)
-# thread.start()
-
-# executor = ProcessPoolExecutor(len(drones))
-
-loop = asyncio.get_event_loop()
-
-for drone in drones:
-
-  # asyncio.async(drone.flyThread())
-
-  tasks += [loop.create_task(drone.flyThread())]
-
-  # await task
-
-  # tasks += [loop.run_in_executor(executor, )]
-
-
-airsim.wait_key('Press any key to set Trajectories')
-for idx, drone in enumerate(drones):
-  drone.trajectory = trajectories[idx]
-
-loop.run_forever()
+for thread in threads:
+  thread.join()
